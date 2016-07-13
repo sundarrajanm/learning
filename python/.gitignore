@@ -1,2 +1,7 @@
 **/*/env/*
 **/*/*.pyc
+**/*/pytddmon*
+**/*/.cache*
+**/*/.project
+**/*/.pydevproject
+**/*/.settings

@@ -1,0 +1,46 @@
+@startuml
+
+participant Subscriber
+
+box "IWRS Akka Cluster Cloud Platform" #LightCyan
+actor IngressActor <<100s>>
+actor IWRSActor <<1000000s>>
+database AppAsJsonStateMachine <<MongoDB>>
+end box
+
+Subscriber -> IngressActor: Start IWRS
+
+activate IngressActor
+    IngressActor -> IWRSActor: << actorOf >>
+    activate IWRSActor
+    IWRSActor --> IngressActor: actorRef
+    deactivate IWRSActor
+    IngressActor -> Subscriber: Started
+    deactivate IngressActor
+
+IWRSActor -> IWRSActor: initState()
+activate IWRSActor
+IWRSActor -> AppAsJsonStateMachine: Fetch App
+IWRSActor <-- AppAsJsonStateMachine
+deactivate IWRSActor
+
+note over IWRSActor
+Mutable AppData (com.placeholder.State)
+end note
+
+Subscriber -> IWRSActor: Input timestamp, <b>tIn</b>
+    activate IWRSActor  #FFBBBB
+    group EXTERNAL LATENCY, es
+        IWRSActor -> CustomerBusinessLogic: input
+        IWRSActor <- CustomerBusinessLogic: output
+    end
+Subscriber <--IWRSActor: Output timestamp, <b>tOut</b>
+deactivate IWRSActor
+note over Subscriber
+<b>Latency -> fixed: </b>
+<b>tOut - tInt < 200ms, when es = 0ms</b>
+<b>Throughput: </b>
+<b>Bound by memory -> number of actors per compute instance</b>
+end note
+
+@enduml

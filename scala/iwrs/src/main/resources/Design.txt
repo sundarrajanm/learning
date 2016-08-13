@@ -2,13 +2,13 @@
 
 participant Subscriber
 
-box "IWRS Akka Cluster Cloud Platform" #LightCyan
+box "com.placeholder.fsm.IWRS Akka Cluster Cloud Platform" #LightCyan
 actor IngressActor <<100s>>
 actor IWRSActor <<1000000s>>
 database AppAsJsonStateMachine <<MongoDB>>
 end box
 
-Subscriber -> IngressActor: Start IWRS
+Subscriber -> IngressActor: Start com.placeholder.fsm.IWRS
 
 activate IngressActor
     IngressActor -> IWRSActor: << actorOf >>

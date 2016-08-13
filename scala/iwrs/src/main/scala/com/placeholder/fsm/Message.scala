@@ -1,4 +1,4 @@
-package com.placeholder
+package com.placeholder.fsm
 
 sealed trait Message
 

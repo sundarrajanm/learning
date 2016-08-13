@@ -1,12 +1,20 @@
 name := "iwrs"
-
 version := "1.0"
-
 scalaVersion := "2.11.8"
 
-libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-actor" % "2.4.1",
-  "com.typesafe.akka" %% "akka-testkit" % "2.4.1",
-  "org.scalatest" % "scalatest_2.11" % "2.2.2" % "test",
-  "com.typesafe.akka" %% "akka-http-spray-json-experimental" % "2.4.9-RC2"
-)
+scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
+
+libraryDependencies ++= {
+  val akkaV       = "2.4.3"
+  val scalaTestV  = "2.2.6"
+  Seq(
+    "com.typesafe.akka" %% "akka-actor"   % akkaV,
+    "com.typesafe.akka" %% "akka-testkit" % akkaV,
+    "com.typesafe.akka" %% "akka-stream"  % akkaV,
+    "com.typesafe.akka" %% "akka-http-experimental" % akkaV,
+    "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaV,
+    "com.typesafe.akka" %% "akka-http-testkit" % akkaV,
+    "org.scalatest"     %% "scalatest" % scalaTestV % "test"
+  )
+}
+

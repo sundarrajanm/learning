@@ -1,8 +1,8 @@
-import akka.actor.{ActorSystem, Props}
-import org.scalatest.{FlatSpec, FlatSpecLike, FunSuite, Matchers}
+import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
-import com.placeholder._
-import com.placeholder.app.{AppLoader, AppUtil, IWRSApplication}
+import com.placeholder.app.{AppLoader, AppUtil}
+import com.placeholder.fsm._
+import org.scalatest.{FlatSpecLike, Matchers}
 
 class IWRSSpec extends TestKit(ActorSystem("testSystem"))
   with ImplicitSender
@@ -29,7 +29,7 @@ class IWRSSpec extends TestKit(ActorSystem("testSystem"))
     iwrs ! Start
     val firstMsg = (AppUtil firstStep testIwrsApp).get.logic.message
     expectMsg(FromAppMsg(firstMsg))
-    println(s"Received: ${firstMsg}")
+    println(s"Received: $firstMsg")
     iwrsActor.stateName should be (Running)
   }
 

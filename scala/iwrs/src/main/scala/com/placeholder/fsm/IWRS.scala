@@ -1,5 +1,6 @@
+package com.placeholder.fsm
+
 import akka.actor.FSM
-import com.placeholder._
 import com.placeholder.app.{AppLoader, AppUtil}
 
 class IWRS extends FSM[State, Data] {

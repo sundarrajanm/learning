@@ -1,5 +1,5 @@
 import akka.actor.ActorSystem
-import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
+import akka.testkit.{ImplicitSender, TestActorRef, TestKit, TestProbe}
 import com.placeholder.app.{AppLoader, AppUtil}
 import com.placeholder.fsm._
 import org.scalatest.{FlatSpecLike, Matchers}
@@ -33,7 +33,10 @@ class IWRSSpec extends TestKit(ActorSystem("testSystem"))
     iwrsActor.stateName should be (Running)
   }
 
-  it should "take the new booking selection and move forward" in {
-    iwrs ! ToAppMsg("1")
+  it should "stop the FSM onreceiving Stop message" in {
+    val testProbe = TestProbe()
+    testProbe watch iwrs
+    iwrs ! Stop
+    testProbe expectTerminated (iwrs)
   }
 }

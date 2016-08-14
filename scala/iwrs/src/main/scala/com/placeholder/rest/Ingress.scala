@@ -17,14 +17,15 @@ import java.util.UUID
 
 import akka.http.scaladsl.model.headers.Location
 import akka.util.Timeout
-import com.placeholder.fsm.{IWRS, Load, Start}
+import com.placeholder.app.AppUtil
+import com.placeholder.fsm.{IWRS, Load, Start, Stop}
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.math._
 import spray.json.DefaultJsonProtocol
 
 import scala.concurrent.duration._
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Random, Success}
 
 trait Protocols extends DefaultJsonProtocol {
 //  implicit val ipInfoFormat = jsonFormat5(IpInfo.apply)
@@ -43,16 +44,23 @@ trait Service extends Protocols {
   val logger: LoggingAdapter
 
   val routes = {
+    get {
+      pathPrefix("iwrs" / "ping") {
+        complete(s"We are alive. Have a nice day with a thought: ${AppUtil.randomQuote}")
+      }
+    } ~
     post {
       (pathPrefix("iwrs" / "app" / "run") & path(Segment)) { actorId =>
         val actorName = s"IWRS-service-$actorId"
-        val msg = for {
+        val tuple = for {
           actor <- system.actorSelection(s"/user/$actorName").resolveOne()
           msg <- actor ? Start
-        } yield msg
+        } yield (msg, actor)
 
-        onComplete(msg) {
-          case Success(m) => complete(m.toString)
+        onComplete(tuple) {
+          case Success(t) =>
+            t._2 ! Stop // TODO: Remove this temp code.
+            complete(t._1.toString)
           case Failure(e) => complete(500, e)
         }
       } ~ (pathPrefix("iwrs" / "app") & path(Segment)) { appId =>
@@ -60,7 +68,7 @@ trait Service extends Protocols {
         val actorName = s"IWRS-service-$actorId"
         val actorRef = system.actorOf(Props[IWRS], actorName)
 
-        println(s"actor path : ${actorRef.path}")
+        logger.info(s"Actor launched: ${actorRef.path}")
         onComplete(actorRef ? Load(appId)) {
           case Success(msg) => respondWithHeader(Location(actorId)) {
             complete(msg.toString)

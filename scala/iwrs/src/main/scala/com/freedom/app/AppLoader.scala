@@ -1,4 +1,4 @@
-package com.placeholder.app
+package com.freedom.app
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import spray.json._

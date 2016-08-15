@@ -1,4 +1,4 @@
-package com.placeholder.fsm
+package com.freedom.fsm
 
 sealed trait State
 

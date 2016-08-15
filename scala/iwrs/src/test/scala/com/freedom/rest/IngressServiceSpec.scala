@@ -1,4 +1,4 @@
-package com.placeholder.rest
+package com.freedom.rest
 
 import java.util.UUID
 
@@ -18,9 +18,10 @@ class IngressServiceSpec extends FlatSpec
     }
   }
 
+  var actorId = UUID.randomUUID()
   "Use case 1 - Order Veg Pizza" should "return actorId on app load" in {
     Post("/iwrs/app/app.json") ~> routes ~> check {
-      val actorId = header[Location] match {
+        actorId = header[Location] match {
         case Some(guid) => UUID.fromString(guid.value())
         case None => fail("Location header not found")
       }
@@ -29,21 +30,38 @@ class IngressServiceSpec extends FlatSpec
   }
 
   it should "see - Welcome to Pizza Hut" in {
-    var actorId = UUID.randomUUID()
-
-    Post("/iwrs/app/app.json") ~> routes ~> check {
-      actorId = header[Location] match {
-        case Some(guid) => UUID.fromString(guid.value())
-        case None => fail("Location header not found")
-      }
-    }
-
     Post(s"/iwrs/app/run/$actorId?cmd=start") ~> routes ~> check {
       responseAs[String] should startWith ("Welcome to Pizza Hut.")
     }
+  }
 
+  it should "see - Veg or NonVeg selection" in {
     Post(s"/iwrs/app/run/$actorId?cmd=next&input=1") ~> routes ~> check {
       responseAs[String] should startWith ("Press 1 for Veg, 2 for Non-Veg.")
+    }
+  }
+
+  it should "see - Veg Pizza menu" in {
+    Post(s"/iwrs/app/run/$actorId?cmd=next&input=1") ~> routes ~> check {
+      responseAs[String] should startWith ("Choose from the following options: 1) Exotica")
+    }
+  }
+
+  it should "see - Menu selection confirmation" in {
+    Post(s"/iwrs/app/run/$actorId?cmd=next&input=2") ~> routes ~> check {
+      responseAs[String] should startWith ("Press 1 to confirm the order")
+    }
+  }
+
+  it should "see - Order Id" in {
+    Post(s"/iwrs/app/run/$actorId?cmd=next&input=1") ~> routes ~> check {
+      responseAs[String] should startWith ("Your order id is: 1244")
+    }
+  }
+
+  it should "stop the conversation" in {
+    Post(s"/iwrs/app/run/$actorId?cmd=stop") ~> routes ~> check {
+      responseAs[String] should startWith ("Bye")
     }
   }
 }

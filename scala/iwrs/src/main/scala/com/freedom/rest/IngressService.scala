@@ -1,4 +1,4 @@
-package com.placeholder.rest
+package com.freedom.rest
 
 import java.util.UUID
 
@@ -13,8 +13,8 @@ import akka.http.scaladsl.unmarshalling.Unmarshaller
 import akka.pattern.ask
 import akka.stream.Materializer
 import akka.util.Timeout
-import com.placeholder.app.AppUtil
-import com.placeholder.fsm._
+import com.freedom.app.AppUtil
+import com.freedom.fsm._
 import com.typesafe.config.ConfigFactory
 import spray.json.DefaultJsonProtocol
 
@@ -27,7 +27,7 @@ trait IngresPayload extends DefaultJsonProtocol {
     Unmarshaller.strict[String, Message] { cmd =>
       cmd.toLowerCase match {
         case "start" => Start
-        case "next"  => Next
+        case "next"  => Next()
         case "stop"  => Stop
       }
     }
@@ -75,9 +75,15 @@ trait IngressService extends IngresPayload {
 
   def handleAppRun(actorId: String, cmd: Message, input: Option[String]): server.Route = {
     val actorName = s"IWRS-service-$actorId"
+
+    val procCmd = cmd match {
+      case Next(_) => Next(input.getOrElse(""))
+      case _ => cmd
+    }
+
     val msg = for {
       actor <- system.actorSelection(s"/user/$actorName").resolveOne()
-      msg <- actor ? cmd
+      msg <- actor ? procCmd
     } yield msg
 
     onComplete(msg) {

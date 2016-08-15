@@ -1,4 +1,4 @@
-package com.placeholder.app
+package com.freedom.app
 
 import scala.io.Source
 import scala.util.Random

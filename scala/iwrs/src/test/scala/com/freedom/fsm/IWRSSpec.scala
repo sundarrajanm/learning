@@ -1,8 +1,8 @@
-package com.placeholder.fsm
+package com.freedom.fsm
 
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit, TestProbe}
-import com.placeholder.app.{AppLoader, AppUtil}
+import com.freedom.app.{AppLoader, AppUtil}
 import org.scalatest.{FlatSpecLike, Matchers}
 
 class IWRSSpec extends TestKit(ActorSystem("testSystem"))
@@ -23,7 +23,7 @@ class IWRSSpec extends TestKit(ActorSystem("testSystem"))
     iwrs ! Load("app.json")
     expectMsg(AppLoaded)
     iwrsActor.stateName should be (Ready)
-    iwrsActor.stateData should be (AppData(testIwrsApp))
+    iwrsActor.stateData should be (AppData(testIwrsApp, Map()))
   }
 
   it should "start the application and receive welcome message" in {

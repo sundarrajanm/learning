@@ -42,8 +42,8 @@ class IngressServiceSpec extends FlatSpec
       responseAs[String] should startWith ("Welcome to Pizza Hut.")
     }
 
-//    Post(s"/iwrs/app/run/$actorId?cmd=next&input=1") ~> routes ~> check {
-//      responseAs[String] should startWith ("Press 1 for Veg, 2 for Non-Veg.")
-//    }
+    Post(s"/iwrs/app/run/$actorId?cmd=next&input=1") ~> routes ~> check {
+      responseAs[String] should startWith ("Press 1 for Veg, 2 for Non-Veg.")
+    }
   }
 }

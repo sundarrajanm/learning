@@ -9,6 +9,7 @@ import akka.http.scaladsl.server
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.PathMatchers.Segment
 import akka.http.scaladsl.server.{Route, StandardRoute}
+import akka.http.scaladsl.unmarshalling.Unmarshaller
 import akka.pattern.ask
 import akka.stream.Materializer
 import akka.util.Timeout
@@ -21,13 +22,18 @@ import scala.concurrent.ExecutionContextExecutor
 import scala.util.{Failure, Success}
 import scala.concurrent.duration._
 
-trait Protocols extends DefaultJsonProtocol {
-  //  implicit val ipInfoFormat = jsonFormat5(IpInfo.apply)
-  //  implicit val ipPairSummaryRequestFormat = jsonFormat2(IpPairSummaryRequest.apply)
-  //  implicit val ipPairSummaryFormat = jsonFormat3(IpPairSummary.apply)
+trait IngresPayload extends DefaultJsonProtocol {
+  implicit val cmdTypeUnmarshaller: Unmarshaller[String, Message] =
+    Unmarshaller.strict[String, Message] { cmd =>
+      cmd.toLowerCase match {
+        case "start" => Start
+        case "next"  => Next
+        case "stop"  => Stop
+      }
+    }
 }
 
-trait IngressService extends Protocols {
+trait IngressService extends IngresPayload {
   implicit val system: ActorSystem
 
   implicit def executor: ExecutionContextExecutor
@@ -44,8 +50,9 @@ trait IngressService extends Protocols {
       pathPrefix("iwrs" / "ping") { handlePing }
     } ~
     post {
-      (pathPrefix("iwrs" / "app" / "run") & path(Segment)) { actorId =>
-        handleAppRun(actorId)
+      (pathPrefix("iwrs" / "app" / "run") & path(Segment) &
+        parameters("cmd".as[Message], "input".?)) { (actorId, cmd, input) =>
+        handleAppRun(actorId, cmd, input)
       } ~ (pathPrefix("iwrs" / "app") & path(Segment)) { appId =>
         handleAppStart(appId)
       }
@@ -66,17 +73,16 @@ trait IngressService extends Protocols {
     }
   }
 
-  def handleAppRun(actorId: String): server.Route = {
+  def handleAppRun(actorId: String, cmd: Message, input: Option[String]): server.Route = {
     val actorName = s"IWRS-service-$actorId"
-    val tuple = for {
+    val msg = for {
       actor <- system.actorSelection(s"/user/$actorName").resolveOne()
-      msg <- actor ? Start
-    } yield (msg, actor)
+      msg <- actor ? cmd
+    } yield msg
 
-    onComplete(tuple) {
-      case Success(t) =>
-        t._2 ! Stop // TODO: Remove this temp code.
-        t._1 match {
+    onComplete(msg) {
+      case Success(res) =>
+        res match {
           case FromAppMsg(msg) => complete(msg)
           case _ => complete("")
         }

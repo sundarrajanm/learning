@@ -3,7 +3,7 @@ package com.freedom.rest
 import java.util.UUID
 
 import akka.actor.{ActorSystem, Props}
-import akka.event.Logging
+import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.model.headers.Location
 import akka.http.scaladsl.server
 import akka.http.scaladsl.server.Directives._
@@ -15,7 +15,7 @@ import akka.stream.Materializer
 import akka.util.Timeout
 import com.freedom.app.AppUtil
 import com.freedom.fsm._
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{Config, ConfigFactory}
 import spray.json.DefaultJsonProtocol
 
 import scala.concurrent.ExecutionContextExecutor
@@ -41,9 +41,9 @@ trait IngressService extends IngresPayload {
   implicit val materializer: Materializer
   implicit val timeout = Timeout(5.seconds)
 
-  val config = ConfigFactory.load()
+  def config: Config
 
-  val logger = Logging(system, getClass)
+  val logger: LoggingAdapter
 
   val routes = {
     get {

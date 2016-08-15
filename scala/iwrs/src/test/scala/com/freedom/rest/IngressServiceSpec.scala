@@ -2,14 +2,19 @@ package com.freedom.rest
 
 import java.util.UUID
 
+import akka.event.Logging
 import akka.http.javadsl.model.headers.Location
 import akka.http.scaladsl.testkit.ScalatestRouteTest
+import com.typesafe.config.ConfigFactory
 import org.scalatest.{FlatSpec, Matchers}
 
 class IngressServiceSpec extends FlatSpec
   with Matchers
   with ScalatestRouteTest
   with IngressService {
+
+  override val config = ConfigFactory.load()
+  override val logger = Logging(system, getClass)
 
   "Ingress Service" should "respond to ping request" in {
     Get("/iwrs/ping") ~> routes ~> check {
@@ -29,31 +34,31 @@ class IngressServiceSpec extends FlatSpec
     }
   }
 
-  it should "see - Welcome to Pizza Hut" in {
+  it should "see Welcome to Pizza Hut and booking menu" in {
     Post(s"/iwrs/app/run/$actorId?cmd=start") ~> routes ~> check {
       responseAs[String] should startWith ("Welcome to Pizza Hut.")
     }
   }
 
-  it should "see - Veg or NonVeg selection" in {
+  it should "select booking and see Veg or NonVeg selection" in {
     Post(s"/iwrs/app/run/$actorId?cmd=next&input=1") ~> routes ~> check {
       responseAs[String] should startWith ("Press 1 for Veg, 2 for Non-Veg.")
     }
   }
 
-  it should "see - Veg Pizza menu" in {
+  it should "should select veg and see Veg Pizza menu" in {
     Post(s"/iwrs/app/run/$actorId?cmd=next&input=1") ~> routes ~> check {
       responseAs[String] should startWith ("Choose from the following options: 1) Exotica")
     }
   }
 
-  it should "see - Menu selection confirmation" in {
+  it should "select option 2 and see selection confirmation" in {
     Post(s"/iwrs/app/run/$actorId?cmd=next&input=2") ~> routes ~> check {
       responseAs[String] should startWith ("Press 1 to confirm the order")
     }
   }
 
-  it should "see - Order Id" in {
+  it should "see confirmed Order Id" in {
     Post(s"/iwrs/app/run/$actorId?cmd=next&input=1") ~> routes ~> check {
       responseAs[String] should startWith ("Your order id is: 1244")
     }

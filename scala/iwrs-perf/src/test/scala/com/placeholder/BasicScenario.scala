@@ -7,7 +7,7 @@ import scala.concurrent.duration._
 class BasicSimulation extends Simulation {
 
   val httpConf = http
-    .baseURL("http://localhost:9000/iwrs")
+    .baseURL("http://localhost:8000/iwrs")
 
   val steps = exec(http("LoadApp").post("/app/app.json")
     .check(bodyString is "AppLoaded")
@@ -21,10 +21,10 @@ class BasicSimulation extends Simulation {
   val scn = scenario("Basic").exec(steps)
 
   setUp(
-    scn.inject(rampUsers(10000) over (300 seconds))
+    scn.inject(rampUsers(40 * 1000) over (300 seconds))
   ).protocols(httpConf).assertions(
     //global.responseTime.max.lessThan(200),
-    global.responseTime.mean.lessThan(200),
+    //global.responseTime.mean.lessThan(200),
     global.successfulRequests.percent.greaterThan(95)
   )
 }

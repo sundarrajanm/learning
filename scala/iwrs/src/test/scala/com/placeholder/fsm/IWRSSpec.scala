@@ -1,7 +1,8 @@
+package com.placeholder.fsm
+
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit, TestProbe}
 import com.placeholder.app.{AppLoader, AppUtil}
-import com.placeholder.fsm._
 import org.scalatest.{FlatSpecLike, Matchers}
 
 class IWRSSpec extends TestKit(ActorSystem("testSystem"))

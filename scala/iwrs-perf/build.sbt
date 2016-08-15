@@ -8,6 +8,10 @@ scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
 
 enablePlugins(GatlingPlugin)
 
+fork in run := true
+
+javaOptions += "-Xmx1G"
+
 libraryDependencies ++= {
   val gatlingV       = "2.2.2"
   Seq(
